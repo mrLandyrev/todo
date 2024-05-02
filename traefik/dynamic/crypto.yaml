@@ -1,0 +1,21 @@
+
+http:
+  routers:
+    crypto:
+      rule: "PathPrefix(`/crypto`)"
+      service: crypto
+      middlewares:
+        - "todo-auth"
+        - "stripprefix"
+
+  middlewares:
+    stripprefix:
+      stripPrefix:
+        prefixes:
+        - "/crypto"
+
+  services:
+    crypto:
+      loadBalancer:
+        servers:
+        - url: http://172.18.0.9:3000/

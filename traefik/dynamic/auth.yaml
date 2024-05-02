@@ -16,4 +16,4 @@ http:
     auth:
       loadBalancer:
         servers:
-        - url: http://172.18.0.10:3000/
+        - url: http://auth:3000/

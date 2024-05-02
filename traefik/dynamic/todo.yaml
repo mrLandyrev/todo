@@ -15,7 +15,7 @@ http:
         - "/todo"
     todo-auth:
       forwardAuth:
-        address: "http://172.18.0.10:3000/parse"
+        address: "http://auth:3000/parse"
         trustForwardHeader: true
         authResponseHeadersRegex: "^X-"
     todo-rate-limiter:
@@ -27,4 +27,4 @@ http:
     todo:
       loadBalancer:
         servers:
-        - url: http://172.18.0.4:3000/
+        - url: http://todo:3000/

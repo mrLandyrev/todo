@@ -79,7 +79,7 @@ app.post("/login", express.json(), async (req, res) => {
         const userInDb = await db.query(`SELECT id, roles, password_hash FROM users WHERE login = '${user.login}'`)
 
         if (userInDb.rowCount != 1) {
-            res.status(401).send()
+            res.status(404).send()
             return
         }
 
@@ -129,7 +129,6 @@ app.get("/parse", async (req, res) => {
     }
 
     const payload = jwt.decode(token) as TokenPayload
-    console.log(payload);
 
     res.setHeader('X-User-Id', payload.id);
     res.setHeader('X-User-Roles', payload.roles);

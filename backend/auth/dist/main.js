@@ -66,7 +66,7 @@ app.post("/login", express_1.default.json(), async (req, res) => {
         };
         const userInDb = await db.query(`SELECT id, roles, password_hash FROM users WHERE login = '${user.login}'`);
         if (userInDb.rowCount != 1) {
-            res.status(401).send();
+            res.status(404).send();
             return;
         }
         const isValid = await argon2_1.default.verify(userInDb.rows[0].password_hash, user.password);
@@ -106,7 +106,6 @@ app.get("/parse", async (req, res) => {
         return;
     }
     const payload = jsonwebtoken_1.default.decode(token);
-    console.log(payload);
     res.setHeader('X-User-Id', payload.id);
     res.setHeader('X-User-Roles', payload.roles);
     res.send();
