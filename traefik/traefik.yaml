@@ -1,0 +1,13 @@
+entryPoints:
+  web:
+    address: :80
+
+providers:
+  # Enable the file provider to define routers / middlewares / services in file
+  file:
+    directory: /etc/traefik/dynamic/
+    watch: true
+
+api:
+  dashboard: true
+  insecure: true

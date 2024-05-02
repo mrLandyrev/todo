@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: very-strong-password
+    ports:
+     - "5432:5432"
+    networks:
+      - idi_nahui
+  redis:
+    image: redis
+    networks:
+      - idi_nahui
+  auth:
+    build:
+      context: ./backend/auth
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - gateway
+    networks:
+      - idi_nahui
+  todo:
+    build:
+      context: ./backend/todo
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - gateway
+    networks:
+      - idi_nahui
+  rpm-limiter:
+    build:
+      context: ./backend/rpmLimiter
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - gateway
+      - redis
+    networks:
+      - idi_nahui
+  gateway:
+    image: traefik
+    volumes:
+      - "./traefik/:/etc/traefik/"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    networks:
+      - idi_nahui
+networks:
+  idi_nahui: 

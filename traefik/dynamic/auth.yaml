@@ -1,0 +1,19 @@
+http:
+  routers:
+    auth:
+      rule: "PathPrefix(`/auth`)"
+      service: auth
+      middlewares:
+        - "admin-stripprefix"
+
+  middlewares:
+    admin-stripprefix:
+      stripPrefix:
+        prefixes:
+        - "/auth"
+
+  services:
+    auth:
+      loadBalancer:
+        servers:
+        - url: http://172.18.0.10:3000/

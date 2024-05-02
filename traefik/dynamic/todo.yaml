@@ -1,0 +1,30 @@
+http:
+  routers:
+    todo:
+      rule: "PathPrefix(`/todo`)"
+      service: todo
+      middlewares:
+        - "todo-auth"
+        - "todo-rate-limiter"
+        - "todo-stripprefix"
+
+  middlewares:
+    todo-stripprefix:
+      stripPrefix:
+        prefixes:
+        - "/todo"
+    todo-auth:
+      forwardAuth:
+        address: "http://172.18.0.10:3000/parse"
+        trustForwardHeader: true
+        authResponseHeadersRegex: "^X-"
+    todo-rate-limiter:
+      forwardAuth:
+        address: "http://rpm-limiter:3000"
+        trustForwardHeader: true
+
+  services:
+    todo:
+      loadBalancer:
+        servers:
+        - url: http://172.18.0.4:3000/
