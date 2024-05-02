@@ -4,6 +4,7 @@ http:
       rule: "PathPrefix(`/auth`)"
       service: auth
       middlewares:
+        - "cors"
         - "admin-stripprefix"
 
   middlewares:

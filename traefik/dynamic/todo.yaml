@@ -4,8 +4,9 @@ http:
       rule: "PathPrefix(`/todo`)"
       service: todo
       middlewares:
-        - "todo-auth"
-        - "todo-rate-limiter"
+        - "cors"
+        - "auth"
+        - "rate-limiter"
         - "todo-stripprefix"
 
   middlewares:
@@ -13,15 +14,6 @@ http:
       stripPrefix:
         prefixes:
         - "/todo"
-    todo-auth:
-      forwardAuth:
-        address: "http://auth:3000/parse"
-        trustForwardHeader: true
-        authResponseHeadersRegex: "^X-"
-    todo-rate-limiter:
-      forwardAuth:
-        address: "http://rpm-limiter:3000"
-        trustForwardHeader: true
 
   services:
     todo:
