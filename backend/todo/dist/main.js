@@ -34,8 +34,8 @@ app.post("/", express.json(), async (req, res) => {
     const todo = {
         id: v4(),
         author: userData.id,
-        title: userData.decode(req.body.title),
-        description: userData.decode(req.body.description),
+        title: req.body.title,
+        description: req.body.description,
         createdAt: Date.now(),
     };
     await db.query(`
@@ -48,14 +48,14 @@ app.post("/", express.json(), async (req, res) => {
         ) VALUES (
             ${pg.escapeLiteral(todo.id)},
             ${pg.escapeLiteral(todo.author)},
-            ${pg.escapeLiteral(todo.title)},
-            ${pg.escapeLiteral(todo.description)},
+            ${pg.escapeLiteral(userData.decode(todo.title))},
+            ${pg.escapeLiteral(userData.decode(todo.description))},
             ${todo.createdAt}
         )
     `);
-    res.send();
+    res.send(todo);
 });
-app.put("/:id", express.json(), async (req, res) => {
+app.patch("/:id", express.json(), async (req, res) => {
     const userData = parseRequestUserData(req);
     const todo = {
         id: req.params.id,
