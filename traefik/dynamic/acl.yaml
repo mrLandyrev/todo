@@ -19,4 +19,4 @@ http:
     acl:
       loadBalancer:
         servers:
-        - url: http://172.18.0.8:3000/
+        - url: http://acl:3000/

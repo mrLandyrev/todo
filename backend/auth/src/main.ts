@@ -37,7 +37,10 @@ type TokenPayload = {
     roles: string[];
     key: string;
     type: 'access' | 'refresh',
+    issuer: string;
 };
+
+type GenerateTokenPayload = Omit<TokenPayload, "issuer" | "type">;
 
 const verifyWithDefaultOptions = async (token: string): Promise<boolean> => {
     return new Promise((res) => {
@@ -49,10 +52,10 @@ const verifyWithDefaultOptions = async (token: string): Promise<boolean> => {
         }
     });
 }
-const generateTokensForUser = async (payload: TokenPayload): Promise<TokensPair> => {
+const generateTokensForUser = async (payload: GenerateTokenPayload): Promise<TokensPair> => {
     return {
-        accessToken: jwt.sign({ ...payload, type: 'access' }, privateKey, { expiresIn: "10m", issuer: "me" }),
-        refreshToken: jwt.sign({ ...payload, type: "refresh" }, privateKey, { expiresIn: "2d", issuer: "me" }),
+        accessToken: jwt.sign({ ...payload, type: 'access', issuer: "roman.com"}, privateKey, { expiresIn: "10m" }),
+        refreshToken: jwt.sign({ ...payload, type: "refresh", issuer: "roman.com"}, privateKey, { expiresIn: "2d" }),
     }
 }
 
@@ -72,7 +75,12 @@ app.post("/register", express.json(), async (req, res) => {
         await db.query(`INSERT INTO users (id, login, password_hash, roles) values ('${user.id}', '${user.login}', '${user.passwordHash}', 'user')`)
         await db.query(`insert INTO keys (id, author, key) values (${pg.escapeLiteral(key.id)}, ${pg.escapeLiteral(user.id)}, ${pg.escapeLiteral(key.content)})`)
         
-        res.send(await generateTokensForUser({ id: user.id, roles: ["user"], key: key.id, type: 'access'}));
+        const { accessToken, refreshToken } = await generateTokensForUser({ id: user.id, roles: ["user"], key: key.id});
+        res.send({
+            accessToken,
+            refreshToken,
+            keyId: key.id,
+        });
     } catch {
         res.status(400).send()
         return
@@ -102,6 +110,12 @@ app.post("/login", express.json(), async (req, res) => {
             res.status(401).send()
             return
         }
+        
+        // return reuqest key
+        if (!!body.keyId) {
+            res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: body.keyId }));
+            return;
+        }
 
         // check one time code
         const redisKey = `login-code-${userInDb.rows[0].id}`;
@@ -113,12 +127,6 @@ app.post("/login", express.json(), async (req, res) => {
             return;
         }
 
-        // return reuqest key
-        if (!!body.keyId) {
-            res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: body.keyId, type: "access" }));
-            return;
-        }
-
         // genrate new key
         const key = {
             id: v4(),
@@ -126,9 +134,13 @@ app.post("/login", express.json(), async (req, res) => {
         };
 
         await db.query(`insert INTO keys (id, author, key) values (${pg.escapeLiteral(key.id)}, ${pg.escapeLiteral(userInDb.rows[0].id)}, ${pg.escapeLiteral(key.content)})`);
-        res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: key.id, type: "access" }));
+        const { accessToken, refreshToken } = await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: key.id });
+        res.send({
+            accessToken,
+            refreshToken,
+            keyId: key.id,
+        });
         return;
-        
     } catch {
         res.status(500).send()
     }
@@ -154,7 +166,7 @@ app.post("/refresh", express.json(), async (req, res) => {
         return
     }
 
-    res.send(await generateTokensForUser({ id: payload.id, roles: userInDb.rows[0].roles.split(','), type: "access", key: payload.key }));
+    res.send(await generateTokensForUser({ id: payload.id, roles: userInDb.rows[0].roles.split(','), key: payload.key }));
 });
 
 app.get("/parse", async (req, res) => {

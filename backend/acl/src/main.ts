@@ -1,7 +1,5 @@
 import express from "express"
 import redis from "redis"
-import pg from "pg"
-import { v4 } from "uuid";
 
 const redisClient = await redis.createClient({
     url: "redis://default:redispw@redis:6379"

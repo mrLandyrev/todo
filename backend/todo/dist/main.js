@@ -8,7 +8,15 @@ const db = new pg.Client({
     "database": "postgres"
 });
 await db.connect();
-await db.query("CREATE TABLE IF NOT EXISTS todos (id UUID not null, author UUID not null, text TEXT not null, primary key (id))");
+await db.query(`
+    CREATE TABLE IF NOT EXISTS todos(
+    id UUID not null,
+    author UUID not null,
+    title TEXT not null,
+    description TEXT not null,
+    createdAt BIGINT not null,
+    primary key (id)
+)`);
 const app = express();
 const parseRequestUserData = (req) => ({
     hasRole: (role) => req.headers['x-user-roles'].split(", ").some(x => x === role),
@@ -26,10 +34,43 @@ app.post("/", express.json(), async (req, res) => {
     const todo = {
         id: v4(),
         author: userData.id,
-        text: req.body.text,
+        title: userData.decode(req.body.title),
+        description: userData.decode(req.body.description),
+        createdAt: Date.now(),
     };
-    await db.query(`INSERT INTO todos (id, author, text) VALUES (${pg.escapeLiteral(todo.id)}, ${pg.escapeLiteral(todo.author)}, ${pg.escapeLiteral(userData.decode(todo.text))})`);
-    res.send(todo);
+    await db.query(`
+        INSERT INTO todos (
+            id,
+            author,
+            title,
+            description,
+            createdAt
+        ) VALUES (
+            ${pg.escapeLiteral(todo.id)},
+            ${pg.escapeLiteral(todo.author)},
+            ${pg.escapeLiteral(todo.title)},
+            ${pg.escapeLiteral(todo.description)},
+            ${todo.createdAt}
+        )
+    `);
+    res.send();
+});
+app.put("/:id", express.json(), async (req, res) => {
+    const userData = parseRequestUserData(req);
+    const todo = {
+        id: req.params.id,
+        author: userData.id,
+        title: userData.decode(req.body.title),
+        description: userData.decode(req.body.description),
+    };
+    await db.query(`
+        UPDATE todos SET
+        title = ${pg.escapeLiteral(todo.title)},
+        description = ${pg.escapeLiteral(todo.description)}
+        WHERE id = ${pg.escapeLiteral(todo.id)}
+        AND author = ${pg.escapeLiteral(todo.author)}
+    `);
+    res.send();
 });
 app.delete("/:id", async (req, res) => {
     const userData = parseRequestUserData(req);
@@ -46,15 +87,27 @@ app.delete("/:id", async (req, res) => {
     res.send();
 });
 app.get("/", async (req, res) => {
+    console.log("test");
     const userData = parseRequestUserData(req);
     let author = userData.id;
     if (!!req.query['author'] && userData.hasRole("admin")) {
         author = req.query['author'];
     }
-    const list = await db.query(`SELECT id, text FROM todos WHERE author = ${pg.escapeLiteral(author)}`);
+    const list = await db.query(`
+        SELECT
+            id,
+            title,
+            description,
+            createdAt 
+        FROM todos
+        WHERE author = ${pg.escapeLiteral(author)}
+    `);
+    console.log(list.rows);
     res.send(list.rows.map(todo => ({
         id: todo.id,
-        text: userData.encode(todo.text),
+        title: userData.encode(todo.title),
+        description: userData.encode(todo.description),
+        createdAt: +todo.createdat,
     })));
 });
 app.listen(3000, () => console.log("started"));

@@ -34,8 +34,8 @@ const verifyWithDefaultOptions = async (token) => {
 };
 const generateTokensForUser = async (payload) => {
     return {
-        accessToken: jwt.sign({ ...payload, type: 'access' }, privateKey, { expiresIn: "10m", issuer: "me" }),
-        refreshToken: jwt.sign({ ...payload, type: "refresh" }, privateKey, { expiresIn: "2d", issuer: "me" }),
+        accessToken: jwt.sign({ ...payload, type: 'access', issuer: "roman.com" }, privateKey, { expiresIn: "10m" }),
+        refreshToken: jwt.sign({ ...payload, type: "refresh", issuer: "roman.com" }, privateKey, { expiresIn: "2d" }),
     };
 };
 app.post("/register", express.json(), async (req, res) => {
@@ -51,7 +51,12 @@ app.post("/register", express.json(), async (req, res) => {
     try {
         await db.query(`INSERT INTO users (id, login, password_hash, roles) values ('${user.id}', '${user.login}', '${user.passwordHash}', 'user')`);
         await db.query(`insert INTO keys (id, author, key) values (${pg.escapeLiteral(key.id)}, ${pg.escapeLiteral(user.id)}, ${pg.escapeLiteral(key.content)})`);
-        res.send(await generateTokensForUser({ id: user.id, roles: ["user"], key: key.id, type: 'access' }));
+        const { accessToken, refreshToken } = await generateTokensForUser({ id: user.id, roles: ["user"], key: key.id });
+        res.send({
+            accessToken,
+            refreshToken,
+            keyId: key.id,
+        });
     }
     catch {
         res.status(400).send();
@@ -71,6 +76,11 @@ app.post("/login", express.json(), async (req, res) => {
             res.status(401).send();
             return;
         }
+        // return reuqest key
+        if (!!body.keyId) {
+            res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: body.keyId }));
+            return;
+        }
         // check one time code
         const redisKey = `login-code-${userInDb.rows[0].id}`;
         const storedCode = await redisClient.get(redisKey);
@@ -79,18 +89,18 @@ app.post("/login", express.json(), async (req, res) => {
             res.status(401).send();
             return;
         }
-        // return reuqest key
-        if (!!body.keyId) {
-            res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: body.keyId, type: "access" }));
-            return;
-        }
         // genrate new key
         const key = {
             id: v4(),
             content: body.keyContent,
         };
         await db.query(`insert INTO keys (id, author, key) values (${pg.escapeLiteral(key.id)}, ${pg.escapeLiteral(userInDb.rows[0].id)}, ${pg.escapeLiteral(key.content)})`);
-        res.send(await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: key.id, type: "access" }));
+        const { accessToken, refreshToken } = await generateTokensForUser({ id: userInDb.rows[0].id, roles: userInDb.rows[0].roles.split(","), key: key.id });
+        res.send({
+            accessToken,
+            refreshToken,
+            keyId: key.id,
+        });
         return;
     }
     catch {
@@ -113,7 +123,7 @@ app.post("/refresh", express.json(), async (req, res) => {
         res.status(401).send();
         return;
     }
-    res.send(await generateTokensForUser({ id: payload.id, roles: userInDb.rows[0].roles.split(','), type: "access", key: payload.key }));
+    res.send(await generateTokensForUser({ id: payload.id, roles: userInDb.rows[0].roles.split(','), key: payload.key }));
 });
 app.get("/parse", async (req, res) => {
     const token = req.headers.authorization?.replace("Bearer ", "");
