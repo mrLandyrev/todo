@@ -4,6 +4,7 @@ services:
   db:
     image: postgres
     shm_size: 128mb
+    restart: always
     environment:
       POSTGRES_PASSWORD: very-strong-password
     ports:
@@ -12,6 +13,7 @@ services:
       - idi_nahui
   redis:
     image: redis
+    restart: always
     networks:
       - idi_nahui
   auth:
@@ -21,6 +23,7 @@ services:
     depends_on:
       - db
       - gateway
+    restart: always
     networks:
       - idi_nahui
   todo:
@@ -30,6 +33,7 @@ services:
     depends_on:
       - db
       - gateway
+    restart: always
     networks:
       - idi_nahui
   acl:
@@ -39,12 +43,14 @@ services:
     depends_on:
       - redis
       - gateway
+    restart: always
     networks:
       - idi_nahui
   rpm-limiter:
     build:
       context: ./backend/rpmLimiter
       dockerfile: Dockerfile
+    restart: always
     depends_on:
       - db
       - gateway
@@ -55,6 +61,7 @@ services:
     image: traefik
     volumes:
       - "./traefik/:/etc/traefik/"
+    restart: always
     ports:
       - "80:80"
       - "443:443"
