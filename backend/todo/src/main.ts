@@ -17,11 +17,20 @@ const app = express();
 type UserData = {
     hasRole: (role: string) => boolean;
     id: string;
+    encode: (content: string) => string;
+    decode: (content: string) => string;
 }
 
 const parseRequestUserData = (req: express.Request): UserData => ({
     hasRole: (role: string) => (req.headers['x-user-roles'] as string).split(", ").some(x => x === role),
     id: req.headers["x-user-id"] as string,
+    encode: (content: string) => {
+        const keyContent = req.headers['x-key-content'] as string;
+        return content.split("").map((x, i) => (x + keyContent[i % keyContent.length])).join("");
+    },
+    decode: (content: string) => {
+        return content.split("").map((x, i) => i % 2 ? "" : x).join("");
+    },
 })
 
 app.post("/", express.json(), async (req, res) => {
@@ -32,7 +41,7 @@ app.post("/", express.json(), async (req, res) => {
         text: req.body.text,
     }
 
-    await db.query(`INSERT INTO todos (id, author, text) VALUES ('${todo.id}', '${todo.author}', ${pg.escapeLiteral(todo.text)})`);
+    await db.query(`INSERT INTO todos (id, author, text) VALUES (${pg.escapeLiteral(todo.id)}, ${pg.escapeLiteral(todo.author)}, ${pg.escapeLiteral(userData.decode(todo.text))})`);
     res.send(todo)
 });
 
@@ -41,7 +50,7 @@ app.delete("/:id", async (req, res) => {
 
     const id = req.params.id;
 
-    let query = `DELETE FROM todos WHERE 'id = ${pg.escapeLiteral(id)}`
+    let query = `DELETE FROM todos WHERE id = ${pg.escapeLiteral(id)}`
 
     if (!userData.hasRole('admin')) {
         query += ` AND author = ${pg.escapeLiteral(userData.id)}`
@@ -64,12 +73,11 @@ app.get("/", async (req, res) => {
     if (!!req.query['author'] && userData.hasRole("admin")) {
         author = req.query['author'] as string
     }
-    
 
     const list = await db.query(`SELECT id, text FROM todos WHERE author = ${pg.escapeLiteral(author)}`);
     res.send(list.rows.map(todo => ({
         id: todo.id,
-        text: todo.text,
+        text: userData.encode(todo.text),
     })));
 });
 

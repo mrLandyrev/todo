@@ -13,6 +13,13 @@ const app = express();
 const parseRequestUserData = (req) => ({
     hasRole: (role) => req.headers['x-user-roles'].split(", ").some(x => x === role),
     id: req.headers["x-user-id"],
+    encode: (content) => {
+        const keyContent = req.headers['x-key-content'];
+        return content.split("").map((x, i) => (x + keyContent[i % keyContent.length])).join("");
+    },
+    decode: (content) => {
+        return content.split("").map((x, i) => i % 2 ? "" : x).join("");
+    },
 });
 app.post("/", express.json(), async (req, res) => {
     const userData = parseRequestUserData(req);
@@ -21,13 +28,13 @@ app.post("/", express.json(), async (req, res) => {
         author: userData.id,
         text: req.body.text,
     };
-    await db.query(`INSERT INTO todos (id, author, text) VALUES ('${todo.id}', '${todo.author}', ${pg.escapeLiteral(todo.text)})`);
+    await db.query(`INSERT INTO todos (id, author, text) VALUES (${pg.escapeLiteral(todo.id)}, ${pg.escapeLiteral(todo.author)}, ${pg.escapeLiteral(userData.decode(todo.text))})`);
     res.send(todo);
 });
 app.delete("/:id", async (req, res) => {
     const userData = parseRequestUserData(req);
     const id = req.params.id;
-    let query = `DELETE FROM todos WHERE 'id = ${pg.escapeLiteral(id)}`;
+    let query = `DELETE FROM todos WHERE id = ${pg.escapeLiteral(id)}`;
     if (!userData.hasRole('admin')) {
         query += ` AND author = ${pg.escapeLiteral(userData.id)}`;
     }
@@ -47,7 +54,7 @@ app.get("/", async (req, res) => {
     const list = await db.query(`SELECT id, text FROM todos WHERE author = ${pg.escapeLiteral(author)}`);
     res.send(list.rows.map(todo => ({
         id: todo.id,
-        text: todo.text,
+        text: userData.encode(todo.text),
     })));
 });
 app.listen(3000, () => console.log("started"));

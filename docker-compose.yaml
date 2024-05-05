@@ -32,6 +32,15 @@ services:
       - gateway
     networks:
       - idi_nahui
+  acl:
+    build:
+      context: ./backend/acl
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+      - gateway
+    networks:
+      - idi_nahui
   rpm-limiter:
     build:
       context: ./backend/rpmLimiter

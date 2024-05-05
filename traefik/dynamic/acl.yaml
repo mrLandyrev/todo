@@ -1,0 +1,22 @@
+http:
+  routers:
+    acl:
+      rule: "PathPrefix(`/acl`)"
+      service: acl
+      middlewares:
+        - "cors"
+        - "auth"
+        - "rate-limiter"
+        - "acl-stripprefix"
+
+  middlewares:
+    acl-stripprefix:
+      stripPrefix:
+        prefixes:
+        - "/acl"
+
+  services:
+    acl:
+      loadBalancer:
+        servers:
+        - url: http://172.18.0.8:3000/
