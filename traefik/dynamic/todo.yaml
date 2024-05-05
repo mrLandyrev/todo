@@ -19,4 +19,4 @@ http:
     todo:
       loadBalancer:
         servers:
-        - url: http://172.18.0.5:3000/
+        - url: http://todo:3000/
