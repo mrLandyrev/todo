@@ -1,0 +1,33 @@
+<h2>Editing note</h2>
+
+<form (ngSubmit)="saveEdit()" [formGroup]="noteData" class="note">
+  <tui-input formControlName="title" [tuiTextfieldCleaner]="true">
+    Title
+    <input tuiTextfield />
+  </tui-input>
+  <tui-text-area
+    formControlName="description"
+    [expandable]="true"
+    [tuiTextfieldCleaner]="true"
+    >Description</tui-text-area
+  >
+
+  <tui-input-files
+    accept="image/*"
+    formControlName="fileData"
+    (change)="onFileChange()"
+  ></tui-input-files>
+
+  <img [src]="file" class="file" />
+
+  <div class="actions">
+    <button
+      appearance="success"
+      tuiButton
+      type="submit"
+      icon="tuiIconCheckLarge"
+      [disabled]="this.noteData.invalid"
+      class="save"
+    ></button>
+  </div>
+</form>

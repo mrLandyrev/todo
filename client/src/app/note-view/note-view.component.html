@@ -1,0 +1,32 @@
+<tui-island *tuiLet="note$ | async as note" [textAlign]="'center'">
+  <h3 class="tui-island__title">{{ note?.title }}</h3>
+  <p class="tui-island__paragraph">
+    {{ note?.description }}
+  </p>
+
+  <p class="tui-island__paragraph">
+    {{ note?.createdAt | date : "medium" }}
+  </p>
+
+  <img *ngIf="note?.file" [src]="note?.file" class="file" />
+  <div class="actions">
+    <button
+      appearance="secondary-destructive"
+      size="m"
+      tuiButton
+      type="button"
+      icon="tuiIconTrash"
+      style="width: 25%"
+      (click)="remove(note?.id)"
+    ></button>
+    <button
+      appearance="secondary"
+      size="m"
+      tuiButton
+      type="button"
+      icon="tuiIconEdit"
+      style="width: 25%"
+      (click)="edit(note!)"
+    ></button>
+  </div>
+</tui-island>

@@ -1,0 +1,12 @@
+@import './css-vars.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+[tuiWrapper][data-appearance='success'] {
+  background: rgb(34, 159, 34);
+  color: #fff;
+}

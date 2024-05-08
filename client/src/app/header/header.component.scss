@@ -1,0 +1,40 @@
+.head {
+  width: calc(100vw - 24px);
+  box-shadow: var(--box-shadow);
+  color: #A933FF;
+  background: #e1dae8;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 1rem;
+  justify-content: space-between;
+
+  .container {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: inherit
+  }
+
+  .title {
+    font: var(--tui-font-heading-5);
+    line-height: 1;
+  }
+
+  .mode {
+    cursor: pointer;
+  }
+
+  .login-btn {
+    height: 40px;
+  }
+}
+
+.options {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}

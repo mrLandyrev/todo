@@ -1,0 +1,47 @@
+<form (ngSubmit)="saveNew()" [formGroup]="noteData" class="note">
+  <tui-input formControlName="title" [tuiTextfieldCleaner]="true">
+    Title
+    <input tuiTextfield />
+  </tui-input>
+  <tui-text-area
+    formControlName="description"
+    [expandable]="true"
+    [tuiTextfieldCleaner]="true"
+    >Description</tui-text-area
+  >
+
+  <tui-input-files
+    accept="image/*"
+    formControlName="fileData"
+    (change)="onFileChange()"
+  >
+    <ng-template #base>
+      <div class="content">
+        <tui-marker-icon
+          mode="link"
+          src="tuiIconUploadCloudLarge"
+        ></tui-marker-icon>
+        <div>
+          <a>Click to upload image</a>
+        </div>
+      </div>
+    </ng-template>
+  </tui-input-files>
+
+  <tui-files class="tui-space_top-1" *ngIf="noteData.controls.fileData.value">
+    <tui-file
+      [file]="noteData.controls.fileData.value"
+      [showDelete]="noteData.controls.fileData.value"
+      (removed)="removeFile()"
+    ></tui-file>
+  </tui-files>
+  <img [src]="file" class="file" />
+
+  <button
+    appearance="success"
+    tuiButton
+    type="submit"
+    icon="tuiIconCheckLarge"
+    [disabled]="this.noteData.invalid"
+  ></button>
+</form>

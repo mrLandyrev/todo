@@ -1,0 +1,24 @@
+:host {
+  width: 75%;
+  padding: 24px;
+
+  .note {
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+
+    .close {
+      flex-grow: 0.5;
+    }
+  }
+
+  .file {
+    border-radius: 1rem;
+  }
+}

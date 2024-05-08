@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  gap: 24px;
+  box-shadow: var(--box-shadow);
+  padding: 12px 24px;
+  width: 100%;
+
+  .title {
+    font: var(--tui-font-heading-6);
+  }
+
+  .note {
+    background: var(--tui-base-02);
+  }
+}

@@ -1,0 +1,58 @@
+<form [formGroup]="authForm">
+  <div class="form">
+    <div>
+      <tui-input formControlName="username" [tuiTextfieldCleaner]="true">
+        Email
+        <input tuiTextfield />
+      </tui-input>
+      <tui-error
+        *ngIf="
+          authForm.controls.username.invalid && authForm.controls.username.dirty
+        "
+        [error]="'incorrect email'"
+      ></tui-error>
+    </div>
+    <div>
+      <tui-input-password
+        formControlName="password"
+        [tuiTextfieldCleaner]="true"
+      >
+        Password
+        <input tuiTextfield />
+      </tui-input-password>
+      <tui-error
+        *ngIf="
+          authForm.controls.password.invalid && authForm.controls.password.dirty
+        "
+        [error]="
+          'min length 8 symbols and two register letters and use symbols '
+        "
+      ></tui-error>
+    </div>
+
+    <tui-input
+      formControlName="aclKey"
+      [tuiTextfieldCleaner]="true"
+      *ngIf="!keyId"
+    >
+      Acl code
+      <input tuiTextfield />
+    </tui-input>
+  </div>
+
+  <div class="buttons">
+    <button
+      appearance="success"
+      tuiButton
+      (click)="register()"
+      [disabled]="
+        this.authForm.invalid || !!this.authForm.controls.aclKey.value
+      "
+    >
+      Register
+    </button>
+    <button appearance="primary" tuiButton (click)="login()">Login</button>
+  </div>
+
+  <span class="message">{{ message$ | async }}</span>
+</form>

@@ -1,0 +1,16 @@
+<span class="title">
+  Notes list
+  <tui-svg src="tuiIconEdit2" class="icon"></tui-svg>
+</span>
+
+<a
+  *ngFor="let note of notes$ | async"
+  tuiAction
+  class="note"
+  [routerLink]="note.id"
+>
+  {{ note?.title }}
+  <a (click)="redirectToEdit(note.id, $event)">
+    <tui-svg src="tuiIconEdit2Large"></tui-svg>
+  </a>
+</a>

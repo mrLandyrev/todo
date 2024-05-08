@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .note {
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+
+    .save {
+      flex-grow: 1;
+    }
+
+    .close {
+      flex-grow: 1;
+    }
+  }
+
+  .file {
+    border-radius: 1rem;
+  }
+}

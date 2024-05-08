@@ -1,0 +1,21 @@
+<tui-theme-night *ngIf="theme$ | async"></tui-theme-night>
+
+<tui-root>
+  <app-header></app-header>
+
+  <div class="container" *ngIf="isUserLoggedIn$ | async">
+    <div class="header">
+      <button
+        tuiButton
+        appearance="secondary"
+        icon="tuiIconPlusCircleLarge"
+        (click)="addNote()"
+      ></button>
+      <app-menu></app-menu>
+    </div>
+    <router-outlet></router-outlet>
+  </div>
+  <div *ngIf="!(isUserLoggedIn$ | async)" class="error">
+    you are not logged in
+  </div>
+</tui-root>

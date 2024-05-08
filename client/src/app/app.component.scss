@@ -1,0 +1,28 @@
+:host {
+  padding: 12px;
+  display: block;
+
+  .container {
+    display: flex;
+  }
+
+  .header {
+  display: flex;
+  flex-direction: column;
+  width: 20rem;
+  gap: 16px;
+  margin-top: 10px;
+
+  .add {
+    font: var(--tui-font-heading-3)
+  }
+}
+
+.error {
+  font-size: 24px;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+}

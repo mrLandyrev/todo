@@ -1,0 +1,19 @@
+.buttons {
+  display: flex;
+  gap: 50px;
+  padding: 10px 50px;
+  justify-content: center;
+}
+
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px
+}
+.message {
+  display: flex;
+  justify-content: center;
+  color: rgb(255, 88, 88);
+  font-size: 20px;
+}

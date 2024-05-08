@@ -1,0 +1,45 @@
+<div class="head">
+  <a routerLink="" class="container">
+    <span class="title">Notes</span>
+    <tui-svg src="tuiIconAlignJustifyLarge"> </tui-svg>
+  </a>
+
+  <tui-svg
+    src="tuiIconSunLarge"
+    *ngIf="darkMode | async"
+    (click)="changeMode()"
+    class="mode"
+  ></tui-svg>
+  <tui-svg
+    src="tuiIconMoonLarge"
+    *ngIf="!(darkMode | async)"
+    (click)="changeMode()"
+    class="mode"
+  ></tui-svg>
+
+  <div class="options">
+    <button
+      *ngIf="!(isUserLoggedIn$ | async)"
+      tuiButton
+      class="login-btn"
+      (click)="openLoginForm()"
+    >
+      login
+    </button>
+
+    <button
+      *ngIf="isUserLoggedIn$ | async"
+      tuiButton
+      class="login-btn"
+      (click)="getAcl()"
+    >
+      get acl code
+    </button>
+    <tui-svg
+      *ngIf="isUserLoggedIn$ | async"
+      src="tuiIconLogOutLarge"
+      (click)="logout()"
+      style="cursor: pointer"
+    ></tui-svg>
+  </div>
+</div>
