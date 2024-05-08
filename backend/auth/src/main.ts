@@ -15,7 +15,16 @@ const db = new pg.Client({
 });
 (async () => {
     await db.connect();
-    await db.query("CREATE TABLE IF NOT EXISTS users (id UUID not null, login varchar(255) not null unique, password_hash varchar(255) not null, roles varchar(255), primary key (id))");
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS users 
+        (
+            id UUID not null,
+            login varchar(255) not null unique,
+            password_hash varchar(255) not null,
+            roles varchar(255) not null,
+            primary key (id)
+        )
+    `);
     await db.query("CREATE TABLE IF NOT EXISTS keys (id UUID not null, author UUID not null, key TEXT not null, primary key (id))");
 })();
 
@@ -170,6 +179,7 @@ app.post("/refresh", express.json(), async (req, res) => {
 });
 
 app.get("/parse", async (req, res) => {
+    console.log("here");
     const token = req.headers.authorization?.replace("Bearer ", "")
     if (!token) {
         res.status(401).send();

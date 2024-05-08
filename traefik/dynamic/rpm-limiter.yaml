@@ -1,0 +1,21 @@
+http:
+  routers:
+    rpm:
+      rule: "PathPrefix(`/rpm`)"
+      service: rpm
+      middlewares:
+        - "cors"
+        - "auth"
+        - "rpm-stripprefix"
+
+  middlewares:
+    rpm-stripprefix:
+      stripPrefix:
+        prefixes:
+        - "/rpm"
+
+  services:
+    rpm:
+      loadBalancer:
+        servers:
+        - url: http://rpmLimiter:3000/

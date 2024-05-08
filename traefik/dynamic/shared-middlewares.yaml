@@ -7,7 +7,7 @@ http:
         authResponseHeadersRegex: "^X-"
     rate-limiter:
       forwardAuth:
-        address: "http://rpm-limiter:3000"
+        address: "http://rpmLimiter:3000/internal"
         trustForwardHeader: true
     cors:
       headers:
